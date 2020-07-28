@@ -29,7 +29,7 @@ parser.add_argument('--dataroot', '-d', type=str, required=True,
 parser.add_argument('--lfw', type=str, required=True,
                     help="(REQUIRED) Absolute path to the labeled faces in the wild dataset folder"
                     )
-parser.add_argument('--dataset_csv', type=str, default='datasets/vggface2_full.csv',
+parser.add_argument('--dataset_csv', type=str, default='datasets/training.csv',
                     help="Path to the csv file containing the image paths of the training dataset."
                     )
 parser.add_argument('--lfw_batch_size', default=64, type=int,
@@ -48,7 +48,7 @@ parser.add_argument('--epochs', default=30, type=int,
 parser.add_argument('--training_triplets_path', default=None, type=str,
     help="Path to training triplets numpy file in 'datasets/' folder to skip training triplet generation step."
                     )
-parser.add_argument('--num_triplets_train', default=1100000, type=int,
+parser.add_argument('--num_triplets_train', default=11000, type=int,
                     help="Number of triplets for training (default: 1100000)"
                     )
 parser.add_argument('--resume_path', default='',  type=str,
@@ -157,7 +157,8 @@ def validate_lfw(model, lfw_dataloader, model_architecture, epoch, epochs):
         progress_bar = enumerate(tqdm(lfw_dataloader))
 
         for batch_index, (data_a, data_b, label) in progress_bar:
-            data_a, data_b, label = data_a.cuda(), data_b.cuda(), label.cuda()
+            if torch.cuda.is_available():
+                data_a, data_b, label = data_a.cuda(), data_b.cuda(), label.cuda()
 
             output_a, output_b = model(data_a), model(data_b)
             distance = l2_distance.forward(output_a, output_b)  # Euclidean distance
@@ -243,10 +244,13 @@ def train_triplet(start_epoch, end_epoch, epochs, train_dataloader, lfw_dataload
 
         for batch_idx, (batch_sample) in progress_bar:
 
-            anc_img = batch_sample['anc_img'].cuda()
-            pos_img = batch_sample['pos_img'].cuda()
-            neg_img = batch_sample['neg_img'].cuda()
-
+            anc_img = batch_sample['anc_img']
+            pos_img = batch_sample['pos_img']
+            neg_img = batch_sample['neg_img']
+            if torch.cuda.is_available():
+                anc_img = anc_img.cuda()
+                pos_img = pos_img.cuda()
+                neg_img = neg_img.cuda()
             # Forward pass - compute embeddings
             anc_embedding, pos_embedding, neg_embedding = model(anc_img), model(pos_img), model(neg_img)
 
@@ -260,17 +264,21 @@ def train_triplet(start_epoch, end_epoch, epochs, train_dataloader, lfw_dataload
             if len(hard_triplets[0]) == 0:
                 continue
 
-            anc_hard_embedding = anc_embedding[hard_triplets].cuda()
-            pos_hard_embedding = pos_embedding[hard_triplets].cuda()
-            neg_hard_embedding = neg_embedding[hard_triplets].cuda()
-
+            anc_hard_embedding = anc_embedding[hard_triplets]
+            pos_hard_embedding = pos_embedding[hard_triplets]
+            neg_hard_embedding = neg_embedding[hard_triplets]
+            if torch.cuda.is_available():
+                anc_hard_embedding = anc_hard_embedding.cuda()
+                pos_hard_embedding = pos_hard_embedding.cuda()
+                neg_hard_embedding = neg_hard_embedding.cuda()
             # Calculate triplet loss
             triplet_loss = TripletLoss(margin=margin).forward(
                 anchor=anc_hard_embedding,
                 positive=pos_hard_embedding,
                 negative=neg_hard_embedding
-            ).cuda()
-
+            )
+            if torch.cuda.is_available():
+                triplet_loss = triplet_loss.cuda()
             # Calculating loss
             triplet_loss_sum += triplet_loss.item()
             num_valid_training_triplets += len(anc_hard_embedding)
