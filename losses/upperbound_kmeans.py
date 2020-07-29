@@ -42,7 +42,7 @@ class UpperBound_kmeans(nn.Module):
         super(UpperBound_kmeans, self).__init__()
         self.num_classes = num_classes
         self.feat_dim = feat_dim
-        self.use_gpu = False
+        self.use_gpu = use_gpu
         N, D, K = 2000, 128, 20
         x = torch.randn(N, D, dtype=torch.float32)
         c = KMEANS(x, K)

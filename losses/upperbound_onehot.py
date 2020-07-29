@@ -42,14 +42,11 @@ class UpperBound_onehot(nn.Module):
         super(UpperBound_onehot, self).__init__()
         self.num_classes = num_classes
         self.feat_dim = feat_dim
-        self.use_gpu = False
+        self.use_gpu = use_gpu
         
-        if self.use_gpu:
-            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim))
-        else:
-            self.label = torch.LongTensor(self.num_classes, 1).random_() % self.feat_dim
-            self.centers= torch.zeros(self.num_classes, self.feat_dim).scatter_(1, self.label, 1)
-            print(type(self.centers))
+        self.label = torch.LongTensor(self.num_classes, 1).random_() % self.feat_dim
+        self.centers= nn.Parameter(torch.zeros(self.num_classes, self.feat_dim).scatter_(1, self.label, 1))
+        print(self.centers)
 
     def forward(self, x, labels):
         """

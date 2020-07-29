@@ -162,15 +162,15 @@ def set_optimizers(optimizer, model, learning_rate, learning_rate_center_loss, c
 def validate_lfw(model, lfw_dataloader, model_architecture, epoch, epochs):
     model.eval()
     with torch.no_grad():
-        l2_distance = PairwiseDistance(2)
+        l2_distance = PairwiseDistance(2).cuda()
         distances, labels = [], []
 
         print("Validating on LFW! ...")
         progress_bar = enumerate(tqdm(lfw_dataloader))
 
         for batch_index, (data_a, data_b, label) in progress_bar:
+            data_a, data_b, label = data_a.cuda(), data_b.cuda(), label.cuda()
             
-
             output_a, output_b = model(data_a), model(data_b)
             distance = l2_distance.forward(output_a, output_b)  # Euclidean distance
 
@@ -255,7 +255,7 @@ def train_center(start_epoch, end_epoch, epochs, train_dataloader, lfw_dataloade
         accs = 0
 
         for batch_index, (data, labels) in progress_bar:
-            
+            data, labels = data.cuda(), labels.cuda()
 
             # Forward pass
             if flag_train_multi_gpu:
@@ -363,7 +363,7 @@ def train_upper(start_epoch, end_epoch, epochs, train_dataloader, lfw_dataloader
         accs = 0 #總共acccurate數量
 
         for batch_index, (data, labels) in progress_bar:
-            
+            data, labels = data.cuda(), labels.cuda()
             #print(data, labels)
             # Forward pass
             if flag_train_multi_gpu:
@@ -529,13 +529,14 @@ def main():
     # Set loss functions
     if loss_used == 'center_loss':
         criterion_crossentropy = nn.CrossEntropyLoss()
-        criterion_centerloss = CenterLoss(num_classes=num_classes, feat_dim=embedding_dimension)
+        criterion_centerloss = CenterLoss(num_classes=num_classes, feat_dim=embedding_dimension).cuda()
     elif loss_used == 'upperbound_onehot':
-        criterion_centerloss = UpperBound_onehot(num_classes=num_classes, feat_dim=embedding_dimension)
+        print('hi')
+        criterion_centerloss = UpperBound_onehot(num_classes=num_classes, feat_dim=embedding_dimension).cuda()
     elif loss_used == 'upperbound_kmeans':
-        criterion_centerloss = UpperBound_kmeans(num_classes=num_classes, feat_dim=embedding_dimension)
+        criterion_centerloss = UpperBound_kmeans(num_classes=num_classes, feat_dim=embedding_dimension).cuda()
     else:
-        criterion_centerloss = UpperBound(num_classes=num_classes, feat_dim=embedding_dimension)
+        criterion_centerloss = UpperBound(num_classes=num_classes, feat_dim=embedding_dimension).cuda()
 
     # Set optimizers
     optimizer_model, optimizer_centerloss = set_optimizers(

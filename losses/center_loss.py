@@ -44,7 +44,8 @@ class CenterLoss(nn.Module):
         self.use_gpu = False
         
         if self.use_gpu:
-            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim))
+            self.label = torch.LongTensor(self.num_classes, 1).random_() % self.feat_dim
+            self.centers= nn.Parameter(torch.zeros(self.num_classes, self.feat_dim).scatter_(1, self.label, 1))
         else:
             self.label = torch.LongTensor(self.num_classes, 1).random_() % self.feat_dim
             self.centers= nn.Parameter(torch.zeros(self.num_classes, self.feat_dim).scatter_(1, self.label, 1))
