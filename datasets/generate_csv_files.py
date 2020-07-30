@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description="Generating csv file for triplet lo
 parser.add_argument('--dataroot', '-d', type=str, required=True,
                     help="(REQUIRED) Absolute path to the dataset folder to generate a csv file containing the paths of the images for triplet loss."
                     )
-parser.add_argument('--csv_name', type=str,
+parser.add_argument('--csv_name', type=str, default = "training.csv",
                     help="Required name of the csv file to be generated. (default: 'vggface2.csv')"
                     )
 args = parser.parse_args()
