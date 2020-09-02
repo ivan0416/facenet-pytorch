@@ -1,28 +1,3 @@
-"""This module was imported from KaiyangZhou's 'pytorch-center-loss' github repository:
-    https://github.com/KaiyangZhou/pytorch-center-loss/blob/master/center_loss.py"""
-
-"""MIT License
-
-Copyright (c) 2018 Kaiyang
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE."""
-
 import torch
 import torch.nn as nn
 import numpy as np
@@ -42,11 +17,14 @@ class UpperBound_onehot(nn.Module):
         super(UpperBound_onehot, self).__init__()
         self.num_classes = num_classes
         self.feat_dim = feat_dim
-        self.use_gpu = use_gpu
-        
-        self.label = torch.LongTensor(self.num_classes, 1).random_() % self.feat_dim
+        self.use_gpu = use_gpu   
+        self.label = torch.LongTensor(self.num_classes, 1)
+        for i in range(self.num_classes):
+            self.label[i] = i
         self.centers= nn.Parameter(torch.zeros(self.num_classes, self.feat_dim).scatter_(1, self.label, 1))
         print(self.centers)
+        
+        
 
     def forward(self, x, labels):
         """

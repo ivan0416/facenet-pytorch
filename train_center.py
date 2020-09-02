@@ -48,7 +48,7 @@ parser.add_argument('--epochs', default=30, type=int,
                     help="Required training epochs (default: 30)"
                     )
 parser.add_argument('--resume_path', default='',  type=str,
-    help='path to latest model checkpoint: (Model_training_checkpoints/model_resnet34_epoch_1.pt file) (default: None)'
+    help='path to latest model checkpoint: (model_training_checkpoints/model_resnet34_epoch_1.pt file) (default: None)'
                     )
 parser.add_argument('--batch_size', default=64, type=int,
                     help="Batch size (default: 64)"
@@ -341,7 +341,7 @@ def train_center(start_epoch, end_epoch, epochs, train_dataloader, lfw_dataloade
             state['best_distance_threshold'] = np.mean(best_distances)
 
         # Save model checkpoint
-        torch.save(state, 'Model_training_checkpoints/model_{}_center_epoch_{}.pt'.format(
+        torch.save(state, 'model_training_checkpoints/model_{}_center_epoch_{}.pt'.format(
                 model_architecture,
                 epoch + 1
             )
@@ -440,7 +440,7 @@ def train_upper(start_epoch, end_epoch, epochs, train_dataloader, lfw_dataloader
             state['best_distance_threshold'] = np.mean(best_distances)
 
         # Save model checkpoint
-        torch.save(state, 'Model_training_checkpoints/model_{}_center_epoch_{}.pt'.format(
+        torch.save(state, 'model_training_checkpoints/model_{}_center_epoch_{}.pt'.format(
                 model_architecture,
                 epoch + 1
             )
@@ -531,7 +531,6 @@ def main():
         criterion_crossentropy = nn.CrossEntropyLoss()
         criterion_centerloss = CenterLoss(num_classes=num_classes, feat_dim=embedding_dimension).cuda()
     elif loss_used == 'upperbound_onehot':
-        print('hi')
         criterion_centerloss = UpperBound_onehot(num_classes=num_classes, feat_dim=embedding_dimension).cuda()
     elif loss_used == 'upperbound_kmeans':
         criterion_centerloss = UpperBound_kmeans(num_classes=num_classes, feat_dim=embedding_dimension).cuda()
